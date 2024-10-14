@@ -12,25 +12,26 @@ import math as math
 #punkty zawsze będą generowane identyczne ponieważ generowane są w takiej samej kolejności
 #i jest ustalony seed
 random.seed(1728893743)
+POINT_SIZE=1
 
 #funkcje do rysowanie
 def draw_points(points):
     vis = Visualizer()
-    vis.add_point(points, s=30, color='green')
+    vis.add_point(points, s=POINT_SIZE, color='green')
     vis.show()
 
 def draw_points_and_save(points,filename):
     vis = Visualizer()
-    vis.add_point(points, s=30, color='green')
+    vis.add_point(points, s=POINT_SIZE, color='green')
     vis.show()
     vis.save(filename)
 
 def draw_line(points_left, points_mid, points_right):
     vis = Visualizer()
     vis.add_line(((-1.0, 0.0), (1.0,0.1)), color='red')
-    vis.add_point(points_left, s=30, color=['green'])
-    vis.add_point(points_mid, s=30, color=['purple'])
-    vis.add_point(points_right, s=30, color=['orange'])
+    vis.add_point(points_left, s=POINT_SIZE, color=['green'])
+    vis.add_point(points_right, s=POINT_SIZE, color=['orange'])
+    vis.add_point(points_mid, s=POINT_SIZE, color=['purple'])
     vis.show()
 
 def draw_line_and_save(points_left, points_mid, points_right,filename):
@@ -41,6 +42,13 @@ def draw_line_and_save(points_left, points_mid, points_right,filename):
     vis.add_point(points_right, s=30, color=['orange'])
     vis.show()
     vis.save(filename)
+
+def export_data(array,filename):
+    f=open(filename, 'x')
+    for i in range(5):
+        for j in range(4):
+            print(len(array[i][j][0]),len(array[i][j][1]),len(array[i][j][2]),end=" ",file=f)
+        print(" ", file=f)
 
 #funkcje generujące linie
 def generate_uniform_points(left, right, n = 10 ** 5):
@@ -109,13 +117,36 @@ def check_points_many(points,a,b,det_funcs, eps, checked_points):
             checked_points[i][j]=[left,mid,right]
 
 #TODO
-def diff_cheker(checked_points,det_fucns,eps):
-    pass
+def diff_cheker(pointsA,pointsB):
+    midinAnotB=[]
+    midinBnotA=[]
+    for p in pointsA[1]:
+        if p not in pointsB[1]:
+            midinAnotB.append(p)
+        else:
+            midinBnotA.append(p)
+    return (midinAnotB,midinBnotA)
+
+def draw_diff(A,B):
+    vis = Visualizer()
+    vis.add_point(A, s=POINT_SIZE, color=['blue'])
+    vis.add_point(B, s=POINT_SIZE, color=['red'])
+    vis.show()
+
+def draw_diff_and_save(A,B,filename):
+    vis=Visualizer()
+    vis.add_line(((-1.0, 0.0), (1.0, 0.1)), color='green')
+    vis.add_point(A,s=POINT_SIZE,color=['blue'])
+    vis.add_point(B,s=POINT_SIZE,color=['red'])
+    vis.show()
+    vis.save(filename)
+
 
 #stałe do linni
 a = (-1.0, 0.0)
 b = (1.0, 0.1)
 
+print("Generating points")
 points1=generate_uniform_points(-1000,1000,10 ** 5)
 points2=generate_uniform_points(-10 ** 14, 10 ** 14, 10 ** 5)
 points_circle=generate_circle_points((0,0),100,1000)
@@ -131,10 +162,32 @@ checked_points2=[[None for _ in range(4)] for __ in range(5)]
 checked_points_circle=[[None for _ in range(4)] for __ in range(5)]
 checked_points_line=[[None for _ in range(4)] for __ in range(5)]
 
+print("checking points")
+
 check_points_many(points1,a,b,det_funcs,eps,checked_points1)
 check_points_many(points2,a,b,det_funcs,eps,checked_points2)
 check_points_many(points_circle,a,b,det_funcs,eps,checked_points_circle)
 check_points_many(points_line,a,b,det_funcs,eps,checked_points_line)
+
+print("exporting data")
+export_data(checked_points1,"points1.txt")
+export_data(checked_points2,"points2.txt")
+export_data(checked_points_circle,"points_circle.txt")
+export_data(checked_points_line,"points_line.txt")
+
+print("drawing points")
+
+#uncategorised points
+draw_points_and_save(points1,"points1_uncategorised")
+draw_points_and_save(points2,"points2_uncategorised")
+draw_points_and_save(points_circle,"points_circle_uncategorised")
+draw_points_and_save(points_line,"points_line_uncategorised")
+
+draw_line_and_save(checked_points1[0][0][0],checked_points1[0][0][1],checked_points1[0][0][3],"points1_categorised")
+
+draw_line_and_save(checked_points_circle[0][0][0],checked_points_circle[0][0][1],checked_points_circle[0][0][2])
+
+
 
 
 
