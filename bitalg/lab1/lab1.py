@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
+
+from PIL.ImageChops import difference
+from notebook_shim.nbserver import diff_members
+
 sys.path.append('C:/Users/franc/Documents/AlgorytmyGeometryczne')
 
 from bitalg.tests.test1 import Test
@@ -12,7 +16,8 @@ import math as math
 #punkty zawsze będą generowane identyczne ponieważ generowane są w takiej samej kolejności
 #i jest ustalony seed
 random.seed(1728893743)
-POINT_SIZE=1
+POINT_SIZE=5
+SPECTRUM_POINT_SIZE=5
 
 #funkcje do rysowanie
 def draw_points(points):
@@ -34,12 +39,12 @@ def draw_line(points_left, points_mid, points_right):
     vis.add_point(points_mid, s=POINT_SIZE, color=['purple'])
     vis.show()
 
-def draw_line_and_save(points_left, points_mid, points_right,filename):
+def draw_line_and_save(points_left, points_mid, points_right,filename,line=True):
     vis = Visualizer()
-    vis.add_line(((-1.0, 0.0), (1.0,0.1)), color='red')
-    vis.add_point(points_left, s=30, color=['green'])
-    vis.add_point(points_mid, s=30, color=['purple'])
-    vis.add_point(points_right, s=30, color=['orange'])
+    if line: vis.add_line(((-1.0, 0.0), (1.0,0.1)), color='red')
+    vis.add_point(points_left, s=POINT_SIZE, color=['green'])
+    vis.add_point(points_mid, s=POINT_SIZE, color=['purple'])
+    vis.add_point(points_right, s=POINT_SIZE, color=['orange'])
     vis.show()
     vis.save(filename)
 
@@ -49,6 +54,7 @@ def export_data(array,filename):
         for j in range(4):
             print(len(array[i][j][0]),len(array[i][j][1]),len(array[i][j][2]),end=" ",file=f)
         print(" ", file=f)
+    f.close()
 
 #funkcje generujące linie
 def generate_uniform_points(left, right, n = 10 ** 5):
@@ -133,13 +139,29 @@ def draw_diff(A,B):
     vis.add_point(B, s=POINT_SIZE, color=['red'])
     vis.show()
 
-def draw_diff_and_save(A,B,filename):
+def draw_diff_and_save(A,B,filename,line=True):
     vis=Visualizer()
-    vis.add_line(((-1.0, 0.0), (1.0, 0.1)), color='green')
+    if line: vis.add_line(((-1.0, 0.0), (1.0, 0.1)), color='green')
     vis.add_point(A,s=POINT_SIZE,color=['blue'])
     vis.add_point(B,s=POINT_SIZE,color=['red'])
     vis.show()
     vis.save(filename)
+
+def draw_spectrum_and_save(points,method,filename,howmany=3):
+    colors=["#d10000","#d1008b","#8b00d1","#0000d1"]
+    PointSet=[set(points[i][method][1]) for i in range(howmany+1)]
+    for i in range(1,howmany):
+        PointSet[i]-=PointSet[i-1]
+    table=[[] for i in range(howmany)]
+    for i in range(howmany):
+        for item in PointSet[i]:
+            table[i].append(item)
+    vis=Visualizer()
+    for i in range(howmany,-1,-1):
+        vis.add_point(points[i][method][1],s=SPECTRUM_POINT_SIZE,color=colors[i],alpha=0.1)
+    vis.show()
+    vis.save(filename)
+
 
 
 #stałe do linni
@@ -183,9 +205,43 @@ draw_points_and_save(points2,"points2_uncategorised")
 draw_points_and_save(points_circle,"points_circle_uncategorised")
 draw_points_and_save(points_line,"points_line_uncategorised")
 
-draw_line_and_save(checked_points1[0][0][0],checked_points1[0][0][1],checked_points1[0][0][3],"points1_categorised")
+draw_line_and_save(checked_points1[0][0][0],checked_points1[0][0][1],checked_points1[0][0][2],"points1_categorised")
 
-draw_line_and_save(checked_points_circle[0][0][0],checked_points_circle[0][0][1],checked_points_circle[0][0][2])
+draw_line_and_save(checked_points_circle[0][0][0],checked_points_circle[0][0][1],checked_points_circle[0][0][2],"points_circle_categorised")
+
+draw_line_and_save(checked_points2[0][0][0],checked_points2[0][0][1],checked_points2[0][0][2],"points2_categorised")
+
+f = open("points2diffs.txt","x")
+A1,B1=diff_cheker(checked_points2[0][0],checked_points2[0][1])
+print(A1,B1,file=f)
+draw_diff_and_save(A1,B1,"points2_diff1")
+A2,B2=diff_cheker(checked_points2[0][0],checked_points2[0][3])
+print(A2,B2,file=f)
+draw_diff_and_save(A2,B2,"points2_dif2")
+f.close()
+
+draw_line_and_save(checked_points_line[0][0][0],checked_points_line[0][0][1],checked_points_line[0][0][2],"points_line_2x2hand_eps0",False)
+draw_line_and_save(checked_points_line[0][2][0],checked_points_line[0][2][1],checked_points_line[0][2][2],"points_line_3x3hand_eps0",False)
+draw_line_and_save(checked_points_line[1][2][0],checked_points_line[1][2][1],checked_points_line[1][2][2],"points_line_3x3hand_eps-14",False)
+
+draw_spectrum_and_save(checked_points_line,0,"line_spectrum_2x2hand_depth4")
+draw_spectrum_and_save(checked_points_line,1,"line_spectrum_2x2lib_depth4")
+draw_spectrum_and_save(checked_points_line,2,"line_spctrum_3x3hand_depth2",1)
+draw_spectrum_and_save(checked_points_line,3,"line_spctrum_3x3lib_depth3",2)
+
+A3,B3=diff_cheker(checked_points_line[0][0],checked_points_line[0][2])
+draw_diff_and_save(A3,B3,"points_line_diff_2x2hand_3x3hand_eps0",False)
+A4,B4=diff_cheker(checked_points_line[0][1],checked_points_line[0][3])
+draw_diff_and_save(A4,B4,"points_line_diff_2x2lib_3x3lib_eps0",False)
+A5,B5=diff_cheker(checked_points_line[1][0],checked_points_line[1][2])
+draw_diff_and_save(A5,B5,"points_line_diff_2x2hand_3x3hand_eps-14",False)
+A6,B6=diff_cheker(checked_points_line[1][2],checked_points_line[1][3])
+draw_diff_and_save(A6,B6,"points_line_diff_3x3hand_3x3lib_eps-14",False)
+A7,B7=diff_cheker(checked_points_line[1][0],checked_points_line[1][1])
+draw_diff_and_save(A7,B7,"points_line_diff_2x2hand_2x2lib_eps-14",False)
+
+
+
 
 
 
