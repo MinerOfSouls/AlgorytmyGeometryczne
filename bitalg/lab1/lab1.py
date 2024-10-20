@@ -138,11 +138,11 @@ def draw_diff(A,B):
     vis.add_point(B, s=POINT_SIZE, color=['red'])
     vis.show()
 
-def draw_diff_and_save(A,B,filename,line=True, a=1):
+def draw_diff_and_save(A,B,filename,line=True, a=1,size=5):
     vis=Visualizer()
     if line: vis.add_line(((-1.0, 0.0), (1.0, 0.1)), color='green')
-    vis.add_point(A,s=POINT_SIZE,color=['blue'], alpha=a)
-    vis.add_point(B,s=POINT_SIZE,color=['red'], alpha=a)
+    vis.add_point(A,s=size,color=['blue'], alpha=a)
+    vis.add_point(B,s=size,color=['red'], alpha=a)
     vis.show()
     vis.save(filename)
 
@@ -213,10 +213,10 @@ draw_line_and_save(checked_points2[0][0][0],checked_points2[0][0][1],checked_poi
 f = open("points2diffs.txt","x")
 A1,B1=diff_cheker(checked_points2[0][0],checked_points2[0][1])
 print(A1,B1,file=f)
-draw_diff_and_save(A1,B1,"points2_diff_2x2handlib")
+draw_diff_and_save(A1,B1,"points2_diff_2x2handlib",True,1,30)
 A2,B2=diff_cheker(checked_points2[0][0],checked_points2[0][3])
 print(A2,B2,file=f)
-draw_diff_and_save(A2,B2,"points2_dif_2x2hand_3x3hand")
+draw_diff_and_save(A2,B2,"points2_dif_2x2hand_3x3hand",True,1,30)
 f.close()
 
 draw_line_and_save(checked_points_line[0][0][0],checked_points_line[0][0][1],checked_points_line[0][0][2],"points_line_2x2hand_eps0",False)
@@ -229,15 +229,15 @@ draw_spectrum_and_save(checked_points_line,2,"line_spctrum_3x3hand_depth2",1)
 draw_spectrum_and_save(checked_points_line,3,"line_spctrum_3x3lib_depth3",2)
 
 A3,B3=diff_cheker(checked_points_line[0][0],checked_points_line[0][2])
-draw_diff_and_save(A3,B3,"points_line_diff_2x2hand_3x3hand_eps0",False)
+draw_diff_and_save(A3,B3,"points_line_diff_2x2hand_3x3hand_eps0",False,0.5)
 A4,B4=diff_cheker(checked_points_line[0][1],checked_points_line[0][3])
-draw_diff_and_save(A4,B4,"points_line_diff_2x2lib_3x3lib_eps0",False)
+draw_diff_and_save(A4,B4,"points_line_diff_2x2lib_3x3lib_eps0",False,0.5)
 A5,B5=diff_cheker(checked_points_line[1][0],checked_points_line[1][2])
-draw_diff_and_save(A5,B5,"points_line_diff_2x2hand_3x3hand_eps-14",False)
+draw_diff_and_save(A5,B5,"points_line_diff_2x2hand_3x3hand_eps-14",False,0.5)
 A6,B6=diff_cheker(checked_points_line[1][2],checked_points_line[1][3])
-draw_diff_and_save(A6,B6,"points_line_diff_3x3hand_3x3lib_eps-14",False)
+draw_diff_and_save(A6,B6,"points_line_diff_3x3hand_3x3lib_eps-14",False,0.5)
 A7,B7=diff_cheker(checked_points_line[1][0],checked_points_line[1][1])
-draw_diff_and_save(A7,B7,"points_line_diff_2x2hand_2x2lib_eps-14",False)
+draw_diff_and_save(A7,B7,"points_line_diff_2x2hand_2x2lib_eps-14",False,0.5)
 
 
 
