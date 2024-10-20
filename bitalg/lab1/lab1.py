@@ -122,7 +122,6 @@ def check_points_many(points,a,b,det_funcs, eps, checked_points):
             left,mid,right=categorize_points(points,a,b,det_funcs[j],eps[i])
             checked_points[i][j]=[left,mid,right]
 
-#TODO
 def diff_cheker(pointsA,pointsB):
     midinAnotB=[]
     midinBnotA=[]
@@ -139,16 +138,16 @@ def draw_diff(A,B):
     vis.add_point(B, s=POINT_SIZE, color=['red'])
     vis.show()
 
-def draw_diff_and_save(A,B,filename,line=True):
+def draw_diff_and_save(A,B,filename,line=True, a=1):
     vis=Visualizer()
     if line: vis.add_line(((-1.0, 0.0), (1.0, 0.1)), color='green')
-    vis.add_point(A,s=POINT_SIZE,color=['blue'])
-    vis.add_point(B,s=POINT_SIZE,color=['red'])
+    vis.add_point(A,s=POINT_SIZE,color=['blue'], alpha=a)
+    vis.add_point(B,s=POINT_SIZE,color=['red'], alpha=a)
     vis.show()
     vis.save(filename)
 
 def draw_spectrum_and_save(points,method,filename,howmany=3):
-    colors=["#d10000","#d1008b","#8b00d1","#0000d1"]
+    colors=["#ffffff","#ffaaaa","#ff5555","#ff0000"]
     PointSet=[set(points[i][method][1]) for i in range(howmany+1)]
     for i in range(1,howmany):
         PointSet[i]-=PointSet[i-1]
@@ -158,7 +157,7 @@ def draw_spectrum_and_save(points,method,filename,howmany=3):
             table[i].append(item)
     vis=Visualizer()
     for i in range(howmany,-1,-1):
-        vis.add_point(points[i][method][1],s=SPECTRUM_POINT_SIZE,color=colors[i],alpha=0.1)
+        vis.add_point(points[i][method][1],s=SPECTRUM_POINT_SIZE,color=colors[i],alpha=0.2)
     vis.show()
     vis.save(filename)
 
@@ -214,10 +213,10 @@ draw_line_and_save(checked_points2[0][0][0],checked_points2[0][0][1],checked_poi
 f = open("points2diffs.txt","x")
 A1,B1=diff_cheker(checked_points2[0][0],checked_points2[0][1])
 print(A1,B1,file=f)
-draw_diff_and_save(A1,B1,"points2_diff1")
+draw_diff_and_save(A1,B1,"points2_diff_2x2handlib")
 A2,B2=diff_cheker(checked_points2[0][0],checked_points2[0][3])
 print(A2,B2,file=f)
-draw_diff_and_save(A2,B2,"points2_dif2")
+draw_diff_and_save(A2,B2,"points2_dif_2x2hand_3x3hand")
 f.close()
 
 draw_line_and_save(checked_points_line[0][0][0],checked_points_line[0][0][1],checked_points_line[0][0][2],"points_line_2x2hand_eps0",False)
