@@ -123,14 +123,17 @@ def check_points_many(points,a,b,det_funcs, eps, checked_points):
             checked_points[i][j]=[left,mid,right]
 
 def diff_cheker(pointsA,pointsB):
-    midinAnotB=[]
-    midinBnotA=[]
-    for p in pointsA[1]:
-        if p not in pointsB[1]:
-            midinAnotB.append(p)
-        else:
-            midinBnotA.append(p)
-    return (midinAnotB,midinBnotA)
+    A=set(pointsA[1])
+    B=set(pointsB[1])
+    A=A-B
+    B=B-A
+    returna=[]
+    for i in A:
+        returna.append(i)
+    retunb=[]
+    for j in B:
+        retunb.append(j)
+    return (returna,retunb)
 
 def draw_diff(A,B):
     vis = Visualizer()
@@ -138,16 +141,16 @@ def draw_diff(A,B):
     vis.add_point(B, s=POINT_SIZE, color=['red'])
     vis.show()
 
-def draw_diff_and_save(A,B,filename,line=True, a=1,size=5):
+def draw_diff_and_save(A,B,filename,line=True, size=5):
     vis=Visualizer()
     if line: vis.add_line(((-1.0, 0.0), (1.0, 0.1)), color='green')
-    vis.add_point(A,s=size,color=['blue'], alpha=a)
-    vis.add_point(B,s=size,color=['red'], alpha=a)
+    vis.add_point(A,s=size,color=['blue'])
+    vis.add_point(B,s=size,color=['red'])
     vis.show()
     vis.save(filename)
 
 def draw_spectrum_and_save(points,method,filename,howmany=3):
-    colors=["#ffffff","#ffaaaa","#ff5555","#ff0000"]
+    colors=["#ffaaaa","#ff807a","#ff5347","#ff0000"]
     PointSet=[set(points[i][method][1]) for i in range(howmany+1)]
     for i in range(1,howmany):
         PointSet[i]-=PointSet[i-1]
@@ -156,7 +159,7 @@ def draw_spectrum_and_save(points,method,filename,howmany=3):
         for item in PointSet[i]:
             table[i].append(item)
     vis=Visualizer()
-    for i in range(howmany,-1,-1):
+    for i in range(howmany):
         vis.add_point(points[i][method][1],s=SPECTRUM_POINT_SIZE,color=colors[i],alpha=0.2)
     vis.show()
     vis.save(filename)
@@ -213,10 +216,10 @@ draw_line_and_save(checked_points2[0][0][0],checked_points2[0][0][1],checked_poi
 f = open("points2diffs.txt","x")
 A1,B1=diff_cheker(checked_points2[0][0],checked_points2[0][1])
 print(A1,B1,file=f)
-draw_diff_and_save(A1,B1,"points2_diff_2x2handlib",True,1,30)
+draw_diff_and_save(A1,B1,"points2_diff_2x2handlib",True,30)
 A2,B2=diff_cheker(checked_points2[0][0],checked_points2[0][3])
 print(A2,B2,file=f)
-draw_diff_and_save(A2,B2,"points2_dif_2x2hand_3x3hand",True,1,30)
+draw_diff_and_save(A2,B2,"points2_dif_2x2hand_3x3hand",True,30)
 f.close()
 
 draw_line_and_save(checked_points_line[0][0][0],checked_points_line[0][0][1],checked_points_line[0][0][2],"points_line_2x2hand_eps0",False)
@@ -229,15 +232,15 @@ draw_spectrum_and_save(checked_points_line,2,"line_spctrum_3x3hand_depth2",1)
 draw_spectrum_and_save(checked_points_line,3,"line_spctrum_3x3lib_depth3",2)
 
 A3,B3=diff_cheker(checked_points_line[0][0],checked_points_line[0][2])
-draw_diff_and_save(A3,B3,"points_line_diff_2x2hand_3x3hand_eps0",False,0.5)
+draw_diff_and_save(A3,B3,"points_line_diff_2x2hand_3x3hand_eps0",False)
 A4,B4=diff_cheker(checked_points_line[0][1],checked_points_line[0][3])
-draw_diff_and_save(A4,B4,"points_line_diff_2x2lib_3x3lib_eps0",False,0.5)
+draw_diff_and_save(A4,B4,"points_line_diff_2x2lib_3x3lib_eps0",False)
 A5,B5=diff_cheker(checked_points_line[1][0],checked_points_line[1][2])
-draw_diff_and_save(A5,B5,"points_line_diff_2x2hand_3x3hand_eps-14",False,0.5)
+draw_diff_and_save(A5,B5,"points_line_diff_2x2hand_3x3hand_eps-14",False)
 A6,B6=diff_cheker(checked_points_line[1][2],checked_points_line[1][3])
-draw_diff_and_save(A6,B6,"points_line_diff_3x3hand_3x3lib_eps-14",False,0.5)
+draw_diff_and_save(A6,B6,"points_line_diff_3x3hand_3x3lib_eps-14",False)
 A7,B7=diff_cheker(checked_points_line[1][0],checked_points_line[1][1])
-draw_diff_and_save(A7,B7,"points_line_diff_2x2hand_2x2lib_eps-14",False,0.5)
+draw_diff_and_save(A7,B7,"points_line_diff_2x2hand_2x2lib_eps-14",False)
 
 
 
