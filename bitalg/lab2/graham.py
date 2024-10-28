@@ -49,7 +49,8 @@ def better_sorter(Q,startpoint):
     b = 0
     for i in range(1, len(Q)):
         if orient(startpoint, building[b], Q[i]) == 0:
-            if ((Q[i][0] ** 2) + (Q[i][1] ** 2)) > ((building[b][0] ** 2) + (building[b][1] ** 2)):
+            if ((((Q[i][0] - startpoint[0]) ** 2) + ((Q[i][1] - startpoint[1]) ** 2)) >
+                    (((building[b][0] - startpoint[0]) ** 2) + ((building[b][1] - startpoint[1]) ** 2))):
                 building[b] = Q[i]
         else:
             building.append(Q[i])
@@ -131,4 +132,4 @@ def graham_algorithm_draw(Q):
     vis.show()
     return Stack
 
-Test().runtest(1, graham_algorithm_draw)
+Test().runtest(1, graham_algorithm)
