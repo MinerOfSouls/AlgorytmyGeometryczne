@@ -1,0 +1,4 @@
+Przed urohomieniem programu należy zmienić sciezkę w linijce 9 na ścieżkę do folderu z biblioteką do wizualizacji od KN bit.
+
+Jeśli program został już uruchomiony należy usunąć wszystkie pliki wygenerowane prze program.
+Wymagane jest to do poprawnego działania.
