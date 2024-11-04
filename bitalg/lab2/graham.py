@@ -132,4 +132,4 @@ def graham_algorithm_draw(Q):
     vis.show()
     return Stack
 
-Test().runtest(1, graham_algorithm)
+Test().runtest(1, graham_algorithm_draw)

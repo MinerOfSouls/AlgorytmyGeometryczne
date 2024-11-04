@@ -1,0 +1,12 @@
+otoczka
+ANIMACJE
+graham
+opisać: szczegóły impementacyjne, w jaki sposób sortowaliśmy, co było komparatotrem, czy sortowanie po odległości, jak wykozustujemy sprawozdani po odległości, liczba punktów w otoczce
+jarvis
+w jaki sposób zrealizowano jaki sposób obliczenia, jak wyznaczony jest kolejny punkty
+
+PORÓWNANIE CZASOWE  I ILE PUNKTÓW W OTOCZCE, CZY TO POPRAWNA ILOŚĆ, CZY DLA KOŁA WSZYSTKIE PUNKTY SĄ W OTOCZCE
+
+DO NAPRAWY
+JARVIS
+ZBIORY
