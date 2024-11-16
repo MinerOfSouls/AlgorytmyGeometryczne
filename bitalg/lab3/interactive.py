@@ -1,38 +1,36 @@
-import time
 
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 
-def tellme(s):
-    print(s)
-    plt.title(s, fontsize=16)
-    plt.draw()
+def give_figure():
+    E=input("Podaj ilość wierzchołków w wielokącie: ")
+    def tellme(s):
+        print(s)
+        plt.title(s, fontsize=16)
+        plt.draw()
 
-plt.figure()
-plt.xlim(0, 1)
-plt.ylim(0, 1)
+    plt.figure()
+    plt.xlim(0, 50)
+    plt.ylim(0, 50)
+    tellme('Proszę nayrsować wielokąt, kliknij aby zacząć')
+    plt.waitforbuttonpress()
 
-tellme('You will define a triangle, click to begin')
-
-plt.waitforbuttonpress()
-
-while True:
     pts = []
-    while len(pts) < 3:
-        tellme('Select 3 corners with mouse')
-        pts = np.asarray(plt.ginput(3, timeout=-1))
-        if len(pts) < 3:
-            tellme('Too few points, starting over')
-            time.sleep(1)  # Wait a second
-
+    tellme('Narysuj wielokąt')
+    pts = np.asarray(plt.ginput(E))
     ph = plt.fill(pts[:, 0], pts[:, 1], 'r', lw=2)
-
-    tellme('Happy? Key click for yes, mouse click for no')
-
-    if plt.waitforbuttonpress():
-        break
-
-    # Get rid of fill
+    tellme('Czy dobry wielokąt?')
+    plt.waitforbuttonpress()
     for p in ph:
         p.remove()
+    return pts
+
+A=[]
+
+for i in range(10):
+    tmp = give_figure()
+    A.append(tmp.tolist())
+
+print(A)
