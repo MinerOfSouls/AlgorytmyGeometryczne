@@ -159,6 +159,7 @@ def get_up_nb(index,Polygon):
 
 
 def triangulate_y_monotonic(Polygon, vis):
+    addededges = []
     max_y = max([Polygon[i][1] for i in range(len(Polygon))])
     min_y = min([Polygon[i][1] for i in range(len(Polygon))])
     starti = 0;
@@ -183,12 +184,6 @@ def triangulate_y_monotonic(Polygon, vis):
     Stack = []
     Stack.append(Polygon.index(Polygon_Sorted[0]))
     Stack.append(Polygon.index(Polygon_Sorted[1]))
-    polygon_graphed=[set() for _ in range(len(Polygon))]
-    for i in range(1,len(Polygon)):
-        polygon_graphed[i-1].add(i)
-        polygon_graphed[i].add(i-1)
-    polygon_graphed[0].add(len(Polygon)-1)
-    polygon_graphed[-1].add(0)
     for i in range(2,len(Polygon)):
         ind=Polygon.index(Polygon_Sorted[i])
         if ((Polygon_Sorted[i] in right and Polygon[Stack[-1]] in left) or
@@ -196,8 +191,7 @@ def triangulate_y_monotonic(Polygon, vis):
             for point in Stack:
                 if are_not_nb(len(Polygon),ind,point):
                     vis.add_line_segment((Polygon[ind], Polygon[point]))
-                    polygon_graphed[point].add(ind)
-                    polygon_graphed[ind].add(point)
+                    addededges.append((ind,point))
             Stack.append(ind)
             Stack = [Stack[-2],Stack[-1]]
         elif Polygon_Sorted[i] in left and Polygon[Stack[-1]] in left:
@@ -210,8 +204,7 @@ def triangulate_y_monotonic(Polygon, vis):
                 tmp = [orient(Polygon[ind], Polygon[Stack[j]], between[k]) for k in range(len(between))]
                 if are_not_nb(len(Polygon), ind,Stack[j]) and len(tmp)>0 and min(tmp)>0:
                     vis.add_line_segment((Polygon[ind],Polygon[Stack[j]]))
-                    polygon_graphed[Stack[j]].add(ind)
-                    polygon_graphed[ind].add(Stack[j])
+                    addededges.append((ind,Stack[j]))
                     added.append((ind,Stack[j]))
             toRm=set()
             for edge in added:
@@ -232,8 +225,7 @@ def triangulate_y_monotonic(Polygon, vis):
                 tmp = [orient(Polygon[ind], Polygon[Stack[j]], between[k]) for k in range(len(between))]
                 if are_not_nb(len(Polygon), ind, Stack[j]) and len(tmp)>0 and max(tmp) < 0:
                     vis.add_line_segment((Polygon[ind], Polygon[Stack[j]]))
-                    polygon_graphed[Stack[j]].add(ind)
-                    polygon_graphed[ind].add(Stack[j])
+                    addededges.append((ind,Stack[j]))
                     added.append((ind, Stack[j]))
             toRm = set()
             for edge in added:
@@ -244,23 +236,17 @@ def triangulate_y_monotonic(Polygon, vis):
             for point in toRm:
                 Stack.remove(point)
             Stack.append(ind)
-    return polygon_graphed
+    return addededges
 
 def triangulation(Polygon):
     vis = Visualizer()
-    vis.add_point(Polygon)
     vis.add_polygon(Polygon, color="orange")
-    vis.add_point(Polygon)
+    vis.add_point(Polygon, color="green")
     if is_y_monotonic(Polygon):
-        graph=triangulate_y_monotonic(Polygon,vis)
-        fname=input("Podaj nr:")
-        vis.save_gif(fname)
-        build=[]
-        for i in range(1,len(Polygon)-1):
-            for j in graph[i]:
-                if are_not_nb(len(Polygon),i,j) and (j,i) not in build and (i,j) not in build:
-                    build.append((i,j))
-        return build
+        added=triangulate_y_monotonic(Polygon,vis)
+        #fname=input("Podaj nr:")
+        #vis.save_gif(fname)
+        return added
     else:
         raise "Not Y-monotonic"
 
