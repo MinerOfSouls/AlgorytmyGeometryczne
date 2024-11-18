@@ -39,6 +39,39 @@ def draw_polygon_colors(polygon,colors):
     vis.add_point(points_regular, color=color_regular)
     vis.show()
 
+def draw_polygon_colors_and_save(polygon,colors,filename):
+    points_start=[]
+    points_end=[]
+    points_connect=[]
+    points_divide=[]
+    points_regular=[]
+    for i in range(len(polygon)):
+        if colors[i]==0:
+            points_start.append(polygon[i])
+        elif colors[i]==1:
+            points_end.append(polygon[i])
+        elif colors[i]==2:
+            points_connect.append(polygon[i])
+        elif colors[i]==3:
+            points_divide.append(polygon[i])
+        elif colors[i]==4:
+            points_regular.append(polygon[i])
+
+    vis = Visualizer()
+    colors_start = ['green']
+    color_end=['red']
+    color_connect=['blue']
+    color_divide=['cyan']
+    color_regular=['#3B240B']
+    vis.add_polygon(polygon, fill=False)
+    vis.add_point(points_start, color=colors_start)
+    vis.add_point(points_end, color=color_end)
+    vis.add_point(points_connect, color=color_connect)
+    vis.add_point(points_divide, color=color_divide)
+    vis.add_point(points_regular, color=color_regular)
+    vis.save(filename)
+    vis.show()
+
 def draw_polygon(polygon):
     vis = Visualizer()
     points = polygon
@@ -197,7 +230,7 @@ def triangulate_y_monotonic(Polygon, vis):
             added=[]
             for j in range(len(Stack)-1,-1,-1):
                 between = []
-                for p in Polygon:
+                for p in left:
                     if Polygon[ind][1] < p[1] < Polygon[Stack[j]][1]:
                         between.append(p)
                 tmp = [orient(Polygon[ind], Polygon[Stack[j]], between[k]) for k in range(len(between))]
@@ -218,7 +251,7 @@ def triangulate_y_monotonic(Polygon, vis):
             added = []
             for j in range(len(Stack) - 1, -1, -1):
                 between=[]
-                for p in Polygon:
+                for p in right:
                     if Polygon[ind][1] < p[1] < Polygon[Stack[j]][1]:
                         between.append(p)
                 tmp = [orient(Polygon[ind], Polygon[Stack[j]], between[k]) for k in range(len(between))]
@@ -242,6 +275,7 @@ def triangulation(Polygon,id=0):
     vis.add_polygon(Polygon, color="orange", fill=False)
     vis.add_point(Polygon, color="blue")
     vis.save(str(id)+"_poly")
+    draw_polygon_colors_and_save(Polygon,color_vertex(Polygon),str(id)+"_categorised")
     if is_y_monotonic(Polygon):
         added=triangulate_y_monotonic(Polygon,vis)
         vis.save(str(id)+"_triangulated")

@@ -1,0 +1,5 @@
+struktura zwracająca wszystkie krawędzie
+klasyfikacja punktów i przykład
+usunąć sześciokąt i pięciokąt
+dokładny opis dizałania algorytmu
+opisać metodę klasyfikacji wierzchołków

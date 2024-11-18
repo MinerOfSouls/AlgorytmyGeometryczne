@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import sys
+sys.path.append('C:/Users/franc/Documents/AlgorytmyGeometryczne')
 from bitalg.tests.test3 import Test
 from bitalg.visualizer.figures.polygon import Polygon
 from bitalg.visualizer.main import Visualizer
+
 
 def draw_polygon_colors(polygon,colors):
     points_start=[]
@@ -239,15 +242,16 @@ def triangulation(Polygon,name):
     vis = Visualizer()
     vis.add_polygon(Polygon, color="orange", fill=False)
     vis.add_point(Polygon, color="blue")
-    vis.save(name+"_poly")
+    vis.save(str(name)+"_poly")
     if is_y_monotonic(Polygon):
         added=triangulate_y_monotonic(Polygon,vis)
-        vis.save(name+"_triangulated")
-        vis.save_gif(name+"_tgif")
+        vis.save(str(name)+"_triangulated")
+        vis.save_gif(str(name)+"_tgif")
         vis.show()
         return added
 
 name=input("Podaj nazwe: ")
 poly=give_figure()
-tri=triangulation(poly,name)
+print(poly.tolist())
+tri=triangulation(poly.tolist(),name)
 print(tri)

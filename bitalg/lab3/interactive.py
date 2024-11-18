@@ -33,4 +33,5 @@ for i in range(10):
     tmp = give_figure()
     A.append(tmp.tolist())
 
-print(A)
+for i in A:
+    print(i)
