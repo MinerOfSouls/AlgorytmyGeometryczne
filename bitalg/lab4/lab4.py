@@ -2,6 +2,8 @@ import random
 import heapq
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import networkx as nx
 from bitalg.tests.test4 import Test
 from bitalg.visualizer.main import Visualizer
 
@@ -66,12 +68,16 @@ class AVLTree:
         return b
 
     def min_key_node(self, node):
+        if not node:
+            return node
         curr = node
         while curr.left:
             curr=curr.left
         return curr
 
     def max_key_node(self, node):
+        if not node:
+            return node
         curr = node
         while curr.right:
             curr = curr.right
@@ -103,28 +109,28 @@ class AVLTree:
 
         return root
 
-    def delete(self, root, key):
+    def delete(self, root, del_key):
         if not root:
             return root
 
-        if key < root.key(self.x):
-            root.left = self.delete(root.left, key)
-        elif key > root.key(self.x):
-            root.right = self.delete(root.left, key)
+        if del_key < root.key(self.x):
+            root.left = self.delete(root.left, del_key)
+        elif del_key > root.key(self.x):
+            root.right = self.delete(root.right, del_key)
         else:
             if not root.left:
-                tmp = root.right
+                temp = root.right
                 root = None
-                return tmp
+                return temp
             elif not root.right:
-                tmp = root.left
+                temp = root.left
                 root = None
-                return tmp
+                return temp
 
-            tmp = self.min_key_node(root.right)
-            root.start = tmp.start
-            root.end = tmp.end
-            root.right = self.delete(root.right, tmp.key(self.x))
+            temp = self.min_key_node(root.right)
+            root.start = temp.start
+            root.end = temp.end
+            root.right = self.delete(root.right, temp.key(self.x))
 
         if not root:
             return root
@@ -134,12 +140,12 @@ class AVLTree:
 
         if balance > 1 and self.balance(root.left) >= 0:
             return self.rotate_right(root)
-        elif balance < -1 and self.balance(root.right) <= 0:
+        if balance < -1 and self.balance(root.right) <= 0:
             return self.rotate_left(root)
-        elif balance > 1 and self.balance(root.left) < 0:
+        if balance > 1 and self.balance(root.left) < 0:
             root.left = self.rotate_left(root.left)
             return self.rotate_right(root)
-        elif balance < -1 and self.balance(root.right) > 0:
+        if balance < -1 and self.balance(root.right) > 0:
             root.right = self.rotate_right(root.right)
             return self.rotate_left(root)
 
@@ -167,11 +173,27 @@ class AVLTree:
         else:
             return None
 
+    def find_parent_node(self, root, node):
+        if not root:
+            return root
+        if root.left and root.left == node:
+            return root
+        elif root.right and root.right == node:
+            return root
+        a = self.find_parent_node(root.right, node)
+        b = self.find_parent_node(root.left, node)
+        if a:
+            return a
+        elif b:
+            return b
+        else:
+            return None
+
     def insert_line_segment(self,start,end):
         self.root=self.insert_node(self.root,TreeNode(start,end))
 
     def delete_key(self,key):
-        self.root=self.delete(self.root,key)
+        self.root= self.delete(self.root, key)
 
     def search_key(self,key):
         return self.find_key(self.root,key)
@@ -185,13 +207,14 @@ class AVLTree:
             array.append(root)
             self.get_all(root.right, array)
 
-    def slow_search(self, key):
+    def slow_search(self, keyA, keyB):
         nodes = []
+        returned = []
         self.get_all(self.root, nodes)
         for node in nodes:
-            if node.key(self.x) == key:
-                return node
-        return None
+            if node.key(self.x) == keyA or node.key(self.x) == keyB:
+                returned.append(node)
+        return returned
 
     def get_neighbours(self, key):
         node = self.search_key(key)
@@ -213,21 +236,92 @@ class AVLTree:
             ret.append((node.start,node.end))
         return ret
 
+    def get_neighbours_node(self, node):
+        if not node:
+            return []
+        left_nb = None
+        right_nb = None
+        if node.right:
+            left_nb = self.min_key_node(node.right)
+        if node.left:
+            right_nb = self.max_key_node(node.left)
+        parent = self.find_parent_node(self.root, node)
+        build = [left_nb, right_nb, parent]
+        build = [x for x in build if x is not None]
+        if len(build) == 3:
+            build.pop(2)
+        ret = []
+        for node in build:
+            ret.append((node.start, node.end))
+        return ret
+
     def swap_and_get_neighbours(self, lineA, lineB):
         nb = {}
+        self.x=self.x-1
         keyA = compute_key(self.x,lineA[0],lineA[1])
         keyB = compute_key(self.x, lineB[0], lineB[1])
-        nodeA = self.search_key(keyA)
-        nodeB = self.search_key(keyB)
-        if not nodeA:
-            nodeA = self.slow_search(keyA)
-        if not nodeB:
-            nodeB = self.slow_search(keyB)
-        self.swap(nodeA,nodeB)
-        nb[lineA] = self.get_neighbours(keyA)
-        nb[lineB] = self.get_neighbours(keyB)
+        nodes = self.slow_search(keyA, keyB)
+        self.swap(nodes[0],nodes[1])
+        nb[(nodes[0].start,nodes[0].end)] = self.get_neighbours_node(nodes[0])
+        nb[(nodes[1].start,nodes[1].end)] = self.get_neighbours_node(nodes[1])
         return nb
 
+    def printer(self, segments):
+        vis=Visualizer()
+        a = []
+        self.get_all(self.root, a)
+        print(a)
+        keys = [n.key(self.x) for n in a]
+        print(keys)
+        for i in range(1, len(keys)):
+            if keys[i-1]>keys[i]:
+                print("NOT HELD")
+        vis.add_line_segment(segments)
+        vis.add_line_segment([(n.start, n.end) for n in a], color = "red")
+        vis.add_line(((self.x, 0), (self.x, 0.01)), color="orange")
+        b = set(a)
+        if len(b) != len(a):
+            print("DUPLICATES FOUND")
+            s = set()
+            for n in a:
+                if n in s:
+                    print(n.key(self.x))
+                    vis.add_line_segment((n.start,n.end), color='black')
+                else:
+                    s.add(n)
+        for i in range(1, len(keys)):
+            if keys[i-1]>keys[i]:
+                print("NOT HELD")
+                vis.add_point((self.x,keys[i-1]), color = "black")
+                vis.add_point((self.x, keys[i]), color = "green")
+                vis.show()
+                break
+        #vis.show()
+        vis.clear()
+        #plot_tree(self.root, self.x)
+
+def plot_tree(root, given_x):
+    def add_edges(node, graph, pos={}, x=0, y=0, layer=1):
+        if node:
+            pos[round(node.key(given_x),2)] = (x, -y)
+            graph.add_node(round(node.key(given_x),2))
+            if node.left:
+                graph.add_edge(round(node.key(given_x),2), round(node.left.key(given_x),2))
+                l = x - 1 / layer
+                pos.update(add_edges(node.left, graph, pos=pos, x=l, y=y + 1, layer=layer + 1))
+            if node.right:
+                graph.add_edge(round(node.key(given_x),2), round(node.right.key(given_x),2))
+                r = x + 1 / layer
+                pos.update(add_edges(node.right, graph, pos=pos, x=r, y=y + 1, layer=layer + 1))
+        return pos
+
+    graph = nx.DiGraph()
+    pos = add_edges(root, graph)
+    labels = {node: node for node in graph.nodes()}
+
+    nx.draw(graph, pos, labels=labels, with_labels=True, node_size=2000, node_color='skyblue', font_size=16,
+            font_weight='bold')
+    plt.show()
 
 def generate_uniform_sections(max_x, max_y, n):
     count=0
@@ -256,32 +350,8 @@ def are_intersecting(segment_a, segment_b):
     else: return False
 
 def is_intersection(segments):
-    Queue=[]
-    Tree=AVLTree()
-    for section in segments:
-        Queue.append((section[0][0],1,segments.index(section)))
-        Queue.append((section[1][0],2,segments.index(section)))
-    heapq.heapify(Queue)
-    while len(Queue)>0:
-        index = heapq.heappop(Queue)
-        Tree.x=index[0]
-        if index[1] == 1:
-            line = (segments[index[2]][0],segments[index[2]][1])
-            Tree.insert_line_segment(line[0],line[1])
-            neighbours = Tree.get_neighbours(compute_key(Tree.x,line[0],line[1]))
-            for nb in neighbours:
-                if are_intersecting(line,nb):
-                    return True
-        elif index[1] == 2:
-            line = (segments[index[2]][0], segments[index[2]][1])
-            neighbours = Tree.get_neighbours(compute_key(Tree.x, line[0], line[1]))
-            Tree.delete_key(compute_key(Tree.x, line[0], line[1]))
-            if len(neighbours)==2:
-                if are_intersecting(neighbours[0],neighbours[1]):
-                    return True
-    return False
-
-def is_intersection_VIS(segments, vis):
+    filename = input("Podaj nazwę alg1: ")
+    vis=Visualizer()
     vis.add_line_segment(segments)
     Queue=[]
     Tree=AVLTree()
@@ -289,18 +359,19 @@ def is_intersection_VIS(segments, vis):
         Queue.append((section[0][0],1,segments.index(section)))
         Queue.append((section[1][0],2,segments.index(section)))
     heapq.heapify(Queue)
-    prev = vis.add_line(((0,0),(0,1)))
+    prev = vis.add_line(((0,0),(0,0.01)), color = "orange")
     while len(Queue)>0:
         index = heapq.heappop(Queue)
-        vis.remove_figure(prev)
-        prev = vis.add_line(((index[0],0),(index[0],1)))
         Tree.x=index[0]
+        vis.remove_figure(prev)
+        prev = vis.add_line(((Tree.x, 0), (Tree.x, 0.01)), color = "orange")
         if index[1] == 1:
             line = (segments[index[2]][0],segments[index[2]][1])
             Tree.insert_line_segment(line[0],line[1])
             neighbours = Tree.get_neighbours(compute_key(Tree.x,line[0],line[1]))
             for nb in neighbours:
                 if are_intersecting(line,nb):
+                    vis.save_gif(filename)
                     return True
         elif index[1] == 2:
             line = (segments[index[2]][0], segments[index[2]][1])
@@ -308,57 +379,24 @@ def is_intersection_VIS(segments, vis):
             Tree.delete_key(compute_key(Tree.x, line[0], line[1]))
             if len(neighbours)==2:
                 if are_intersecting(neighbours[0],neighbours[1]):
+                    vis.save_gif(filename)
                     return True
+    vis.save_gif(filename)
+    return False
+
+def check_found(a,b,found):
+    for point in found:
+        if a==point[1] and b==point[2]:
+            return True
+        elif b==point[1] and a==point[2]:
+            return True
     return False
 
 def find_intersections(segments):
-    intersections = []
-    Queue = []
-    Tree = AVLTree()
-    for section in segments:
-        Queue.append((section[0][0], 1, segments.index(section)))
-        Queue.append((section[1][0], 2, segments.index(section)))
-    heapq.heapify(Queue)
-    while len(Queue) > 0:
-        index = heapq.heappop(Queue)
-        Tree.x = index[0]
-        if index[1] == 1:
-            line = (segments[index[2]][0], segments[index[2]][1])
-            Tree.insert_line_segment(line[0], line[1])
-            neighbours = Tree.get_neighbours(compute_key(Tree.x, line[0], line[1]))
-            for nb in neighbours:
-                point = are_intersecting(line, nb)
-                if point:
-                    heapq.heappush(Queue, (point[0], 3, (point, line, nb)))
-                    intersections.append((point, segments.index(line), segments.index(nb)))
-
-        elif index[1] == 2:
-            line = (segments[index[2]][0], segments[index[2]][1])
-            neighbours = Tree.get_neighbours(compute_key(Tree.x, line[0], line[1]))
-            Tree.delete_key(compute_key(Tree.x, line[0], line[1]))
-            if len(neighbours) == 2:
-                point = are_intersecting(neighbours[0], neighbours[1])
-                if point and (point[0], 3, (point, neighbours[0], neighbours[1])) not in Queue:
-                    heapq.heappush(Queue, (point[0], 3, (point, neighbours[0], neighbours[1])))
-                    intersections.append((point, segments.index(neighbours[0]), segments.index(neighbours[1])))
-
-        elif index[1] == 3:
-            neighbours = Tree.swap_and_get_neighbours(index[2][1], index[2][2])
-            for nb1 in neighbours[index[2][1]]:
-                point = are_intersecting(index[2][1], nb1)
-                if point and point[0] > Tree.x and (point[0], 3, (point, index[2][1], nb1)) not in Queue:
-                    heapq.heappush(Queue, (point[0], 3, (point, index[2][1], nb1)))
-                    intersections.append((point, segments.index(index[2][1]), segments.index(nb1)))
-            for nb2 in neighbours[index[2][2]]:
-                point = are_intersecting(index[2][2], nb2)
-                if point and point[0] > Tree.x and (point[0], 3, (point, index[2][2], nb2)) not in Queue:
-                    heapq.heappush(Queue, (point[0], 3, (point, index[2][2], nb2)))
-                    intersections.append((point, segments.index(index[2][2]), segments.index(nb2)))
-    return intersections
-
-def find_intersections_VIS(segments, vis):
+    filename = input("Podaj nazwę alg2: ")
     vis=Visualizer()
     vis.add_line_segment(segments)
+    vis.save(filename+"segments")
     intersections = []
     Queue = []
     Tree = AVLTree()
@@ -366,29 +404,33 @@ def find_intersections_VIS(segments, vis):
         Queue.append((section[0][0], 1, segments.index(section)))
         Queue.append((section[1][0], 2, segments.index(section)))
     heapq.heapify(Queue)
-    prev = vis.add_line(((0,0),(0,1)))
+    prev = vis.add_line(((0, 0), (0, 0.01)), color = "orange")
     while len(Queue) > 0:
         index = heapq.heappop(Queue)
         Tree.x = index[0]
+        print(Tree.x)
+        print(index)
         vis.remove_figure(prev)
-        prev = vis.add_line(((index[0], 0), (index[0], 1)))
+        prev = vis.add_line(((Tree.x, 0), (Tree.x, 0.01)), color = "orange")
         if index[1] == 1:
             line = (segments[index[2]][0], segments[index[2]][1])
             Tree.insert_line_segment(line[0], line[1])
-            neighbours = Tree.get_neighbours(compute_key(Tree.x, line[0], line[1]))
+            neighbours = Tree.get_neighbours(line[0][1])
             for nb in neighbours:
                 point = are_intersecting(line, nb)
-                if point:
+                if point and not check_found(segments.index(line), segments.index(nb), intersections):
+                    vis.add_point(point, color = "red")
                     heapq.heappush(Queue, (point[0], 3, (point, line, nb)))
                     intersections.append((point, segments.index(line), segments.index(nb)))
 
         elif index[1] == 2:
             line = (segments[index[2]][0], segments[index[2]][1])
-            neighbours = Tree.get_neighbours(compute_key(Tree.x, line[0], line[1]))
-            Tree.delete_key(compute_key(Tree.x, line[0], line[1]))
+            neighbours = Tree.get_neighbours(line[1][1])
+            Tree.delete_key(line[1][1])
             if len(neighbours) == 2:
                 point = are_intersecting(neighbours[0], neighbours[1])
-                if point and (point[0], 3, (point, neighbours[0], neighbours[1])) not in Queue:
+                if point and not check_found(segments.index(neighbours[0]), segments.index(neighbours[1]), intersections):
+                    vis.add_point(point, color="red")
                     heapq.heappush(Queue, (point[0], 3, (point, neighbours[0], neighbours[1])))
                     intersections.append((point, segments.index(neighbours[0]), segments.index(neighbours[1])))
 
@@ -396,15 +438,23 @@ def find_intersections_VIS(segments, vis):
             neighbours = Tree.swap_and_get_neighbours(index[2][1], index[2][2])
             for nb1 in neighbours[index[2][1]]:
                 point = are_intersecting(index[2][1], nb1)
-                if point and point[0] > Tree.x and (point[0], 3, (point, index[2][1], nb1)) not in Queue:
+                if point and point[0] > Tree.x and not check_found(segments.index(index[2][1]), segments.index(nb1), intersections):
+                    vis.add_point(point, color="red")
                     heapq.heappush(Queue, (point[0], 3, (point, index[2][1], nb1)))
                     intersections.append((point, segments.index(index[2][1]), segments.index(nb1)))
             for nb2 in neighbours[index[2][2]]:
                 point = are_intersecting(index[2][2], nb2)
-                if point and point[0] > Tree.x and (point[0], 3, (point, index[2][2], nb2)) not in Queue:
+                if point and point[0] > Tree.x and not check_found(segments.index(index[2][2]), segments.index(nb2), intersections):
+                    vis.add_point(point, color="red")
                     heapq.heappush(Queue, (point[0], 3, (point, index[2][2], nb2)))
                     intersections.append((point, segments.index(index[2][2]), segments.index(nb2)))
+        #Tree.printer(segments)
+    vis.remove_figure(prev)
+    vis.show()
+    vis.save_gif(filename+"gif")
+    vis.save(filename)
     return intersections
+
 
 #Test().runtest(1, generate_uniform_sections)
 #Test().runtest(2, is_intersection)
